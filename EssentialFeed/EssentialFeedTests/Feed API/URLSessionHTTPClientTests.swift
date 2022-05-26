@@ -115,9 +115,9 @@ class URLSessionHTTPClientTests: XCTestCase {
 		return receivedResult
 	}
 		
-	private func anyData() -> Data {
-		return Data(bytes: "any data".utf8)
-	}
+    private func anyData() -> Data {
+        return Data("any data".utf8)
+    }
 		
 	private func anyHTTPURLResponse() -> HTTPURLResponse {
 		return HTTPURLResponse(url: anyURL(), statusCode: 200, httpVersion: nil, headerFields: nil)!
