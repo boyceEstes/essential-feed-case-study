@@ -24,7 +24,7 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
 	
     func test_localFeedLoader_loadOnEmptyCache_deliversNoItems() {
         
-        let sut = makeSut()
+        let sut = makeSUT()
         
         expect(sut, toLoad: [])
     }
@@ -32,8 +32,8 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
     
     func test_localFeedLoader_saveOnSeparateInstance_deliversItems() {
         
-        let sutToPerformSave = makeSut()
-        let sutToPerformLoad = makeSut()
+        let sutToPerformSave = makeSUT()
+        let sutToPerformLoad = makeSUT()
         let feed = uniqueImageFeed().models
         
         let saveExp = expectation(description: "Wait for save completion")
@@ -47,8 +47,33 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
     }
     
     
+    func test_localFeedLoader_itemsSavedOnSeparateInstance_overridesItems() {
+        let sutToPerformFirstSave = makeSUT()
+        let sutToPerformLastSave = makeSUT()
+        let sutToPerformLoad = makeSUT()
+        let firstFeed = uniqueImageFeed().models
+        let latestFeed = uniqueImageFeed().models
+        
+        let saveExp1 = expectation(description: "Wait for save completion")
+        sutToPerformFirstSave.save(firstFeed) { saveError in
+            XCTAssertNil(saveError)
+            saveExp1.fulfill()
+        }
+        wait(for: [saveExp1], timeout: 1)
+        
+        let saveExp2 = expectation(description: "Wait for save completion")
+        sutToPerformLastSave.save(latestFeed) { saveError in
+            XCTAssertNil(saveError)
+            saveExp2.fulfill()
+        }
+        wait(for: [saveExp2], timeout: 1)
+        
+        expect(sutToPerformLoad, toLoad: latestFeed)
+    }
+    
+    
     // MARK: - Helpers
-    private func makeSut(file: StaticString = #file, line: UInt = #line) -> LocalFeedLoader {
+    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> LocalFeedLoader {
         
         let storeBundle = Bundle(for: CoreDataFeedStore.self)
         let storeURL = specificTestStoreURL()
